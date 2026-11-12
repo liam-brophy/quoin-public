@@ -26,7 +26,9 @@ first.
 
 ## What you need
 
-- A Mac with Adobe InDesign (2024 or later) for the InDesign tools
+- A Mac with Adobe InDesign (2024 or later) for the InDesign tools. **Windows is coming in a later release**;
+  the manuscript and EPUB tools in `packages/core` are plain Node.js, but are not yet tested on Windows
+  (image conversion for EPUBs uses a Mac tool, so images must already be JPEG or PNG there).
 - [Claude Code](https://claude.com/claude-code) and [Node.js](https://nodejs.org) 20 or later
 - For EPUB checks: Java (for EPUBCheck) and `npm install -g @daisy/ace`, both optional
 
@@ -94,6 +96,7 @@ without their dialogs, `packages/core` is book-core.
 
 ## Status and licence
 
-Early release: tested on a small number of real books. Windows is not supported for the InDesign tools yet.
+Early release: tested on a small number of real books. The InDesign tools are Mac-only for now; a Windows release
+is planned, and will follow once it can be tested on Windows.
 Licensed under the [Apache License 2.0](LICENSE): use, change and share it, including commercially, with credit
 (see [NOTICE](NOTICE)). The licence covers the code, not the project's name.
