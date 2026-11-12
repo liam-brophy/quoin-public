@@ -18,7 +18,7 @@ import { scoreChars, scoreTags } from 'book-core/score'
 import { previewDesignerScript, registry, runDesignerScript } from './designer-scripts.mjs'
 import { artCheck, artPlace, attachArtLog } from './art.mjs'
 import { fonts, impose, newDocument, pageSpec, SIZES } from './design.mjs'
-import { epub, epubOpeners, epubPrep, printPdf, signature, unusedStyles } from './export.mjs'
+import { epub, epubOpeners, epubPrep, handoffCheck, packageBook, printPdf, signature, unusedStyles } from './export.mjs'
 
 const server = new McpServer({ name: 'indesign', version: '0.1.0' })
 
@@ -543,6 +543,34 @@ server.registerTool(
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
   },
   tool(async ({ document, out, pdfPreset, preflightProfile }) => printPdf({ path: document, out, pdfPreset, preflightProfile })),
+)
+
+server.registerTool(
+  'book_package',
+  {
+    title: 'Handoff check and package',
+    description: 'For handing a book to a printer or the next designer. Without approved: a read-only handoff check (missing or out-of-date links, ' +
+      'missing, substituted and Adobe Fonts, overset text, low-resolution and RGB images, hidden layers, preflight, signature, unused styles), ' +
+      'split into blockers and things to review. Show it to the designer. With out and approved: runs File > Package into that new, empty folder ' +
+      '(fonts, links, IDML, Instructions.txt, optionally a PDF). The document is never saved or changed: if it has unsaved changes, ask the designer to save it.',
+    inputSchema: {
+      document: docPath,
+      out: absPath.optional().describe('New, empty folder for the package (required with approved).'),
+      approved: z.boolean().default(false).describe('The designer has seen the handoff check and wants the package made.'),
+      pdf: z.boolean().default(false).describe('Also put a PDF in the package.'),
+      pdfPreset: z.string().optional().describe('PDF preset for that PDF, e.g. the printer\'s or "[PDF/X-4:2008]".'),
+      idml: z.boolean().default(true),
+      fonts: z.boolean().default(true).describe('Copy fonts (Adobe Fonts are never copied; the report says which).'),
+      comments: z.string().optional().describe('Notes for the printer, written into the package report.'),
+      preflightProfile: z.string().optional(),
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
+  },
+  tool(async ({ document, out, approved, pdf, pdfPreset, idml, fonts, comments, preflightProfile }) => {
+    if (!approved) return handoffCheck({ path: document, preflightProfile })
+    if (!out) throw new Error('Give out: a new, empty folder for the package.')
+    return packageBook({ path: document, out, pdf, pdfPreset, idml, fonts, comments })
+  }),
 )
 
 // ── general design: zines, booklets, flyers ─────────────────

@@ -74,6 +74,48 @@ export async function printPdf({ path, out, pdfPreset, preflightProfile, profile
   return { ...exported, warnings, preflight, signature: sig }
 }
 
+/**
+ * Everything a handoff needs checked, in one report: links, fonts, overset text, layers, preflight,
+ * the signature and unused styles. `blockers` stop a clean package; `toReview` are the designer's call.
+ */
+export async function handoffCheck({ path, profile, preflightProfile }) {
+  const h = await runJsx(await script('handoff'), { path }, LONG)
+  const [preflight, sig, styles] = await Promise.all([
+    runJsx(await script('preflight'), { path: h.path ?? path, profile: preflightProfile }, LONG),
+    signature({ path: h.path ?? path, profile }),
+    unusedStyles({ path: h.path ?? path }),
+  ])
+  const blockers = [], toReview = []
+  const n = (k, one, many = one + 's') => `${k} ${k === 1 ? one : many}`
+  const list = (a, n = 5) => a.slice(0, n).map((x) => (typeof x === 'string' ? x : `${x.link}${x.ppi ? ` (${x.ppi} ppi)` : ''}${x.page ? ` p.${x.page}` : ''}`)).join(', ') + (a.length > n ? `, and ${a.length - n} more` : '')
+  if (!h.saved) blockers.push('The document has never been saved. Package needs a saved file.')
+  else if (h.modified) blockers.push('The document has unsaved changes. Save it before packaging.')
+  if (h.links.missing.length) blockers.push(`${n(h.links.missing.length, 'missing link')}: ${list(h.links.missing)}`)
+  if (h.links.inaccessible.length) blockers.push(`${n(h.links.inaccessible.length, 'link')} can't be read: ${list(h.links.inaccessible)}`)
+  if (h.fonts.missing.length) blockers.push(`Missing ${n(h.fonts.missing.length, 'font')}: ${list(h.fonts.missing)}`)
+  if (h.overset.length) blockers.push(`Overset text in ${n(h.overset.length, 'story', 'stories')}: ${list(h.overset.map((o) => `"${o.startsWith}"${o.lastFrameOnPage ? ` (ends p.${o.lastFrameOnPage})` : ''}`))}`)
+  if (h.links.outOfDate.length) toReview.push(`${n(h.links.outOfDate.length, 'link')} out of date (changed since placing): ${list(h.links.outOfDate)}`)
+  if (h.fonts.substituted.length) toReview.push(`Substituted fonts: ${list(h.fonts.substituted)}`)
+  if (h.fonts.fauxed.length) toReview.push(`Faux (synthesised) styles: ${list(h.fonts.fauxed)}`)
+  if (h.fonts.adobeFonts.length) toReview.push(`${n(h.fonts.adobeFonts.length, 'Adobe Font')} not copied into a package (the printer activates them in Creative Cloud): ${list(h.fonts.adobeFonts)}`)
+  if (h.fonts.noEmbedding.length) toReview.push(`Fonts whose licence forbids PDF embedding: ${list(h.fonts.noEmbedding)}`)
+  if (h.links.lowRes.length) toReview.push(`${n(h.links.lowRes.length, 'image')} under 300 ppi at the placed size: ${list(h.links.lowRes)}`)
+  if (h.links.rgb.length) toReview.push(`${n(h.links.rgb.length, 'RGB image')} (fine for EPUB; for print, check with the printer): ${list(h.links.rgb)}`)
+  if (h.links.embedded.length) toReview.push(`${n(h.links.embedded.length, 'embedded image')} (not copied to Links): ${list(h.links.embedded)}`)
+  if (h.layers.hidden.length) toReview.push(`Hidden layers (packaged, not printed): ${list(h.layers.hidden)}`)
+  if (h.layers.nonPrinting.length) toReview.push(`Non-printing layers: ${list(h.layers.nonPrinting)}`)
+  if (sig.pagesToNextSignature) toReview.push(`${sig.pages} pages is not a whole number of ${sig.signature}-page signatures: ${sig.pagesToNextSignature} to the next (book_signature).`)
+  if (preflight.problems) toReview.push(`Preflight (${preflight.profile}) found ${n(preflight.problems, 'problem')}: ${Object.entries(preflight.byRule).map(([k, v]) => `${k} ${v}`).join(', ')}`)
+  const unused = (styles.unusedParagraph?.length ?? 0) + (styles.unusedCharacter?.length ?? 0)
+  if (unused) toReview.push(`${n(unused, 'unused style')} could be removed before handoff (book_unused_styles).`)
+  return { document: h.document, ready: !blockers.length, blockers, toReview, details: { ...h, preflight, signature: sig, unusedStyles: unused } }
+}
+
+/** File › Package into a new folder: fonts, links, IDML, report, optionally a PDF. Never saves the document. */
+export async function packageBook({ path, out, fonts = true, links = true, idml = true, pdf = false, pdfPreset, comments }) {
+  return runJsx(await script('package'), { path, out, fonts, links, idml, pdf, pdfPreset, comments }, LONG)
+}
+
 /** Export each chapter's styled heading block from the layout as an image, for book_epub_direct's `openers`. */
 export async function epubOpeners({ path, outDir, profile, resolution = 220, transparent = true }) {
   const styles = loadProfile(profile).epub?.opener ?? []

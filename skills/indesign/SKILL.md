@@ -143,6 +143,11 @@ Reports and exports run freely; anything that changes the document is shown firs
    When the EPUB has images, the accessibility metadata should list `visual` too: confirm with the designer.
 4. `book_pdf`: preflight, print PDF with the house preset, signature warning.
 5. At handoff only: `book_unused_styles`; show the list, remove with `approved: true`.
+6. `book_package` for the printer or the next designer. First call it without `approved`: show the blockers
+   (missing links or fonts, overset text, unsaved changes) and the things to review. Fixing them is the designer's work;
+   offer, don't do. Then, with `out` (a new, empty folder) and `approved: true`, it runs File > Package: fonts, links,
+   IDML, Instructions.txt, and a PDF if asked. It never saves the document: if there are unsaved changes, ask the
+   designer to save. Say that Adobe Fonts are not copied and the printer activates them.
 
 ## Writing ExtendScript for `indesign_run_script`
 

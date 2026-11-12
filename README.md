@@ -22,7 +22,7 @@ first.
 | "Make the EPUB" | Writes a validated, accessible EPUB 3 with real headings, alt text, pop-up footnotes and, if you like, chapter openers that look as they do in print |
 | "It needs to be 384 pages" | Reports how far off the build is and tries one change at a time with you |
 | "Set up an 8-page zine, half letter" | Creates the document with a type system from fonts you have, then imposes it for printing and folding |
-| "Is this ready for the printer?" | Preflight, page count against the signature, unused styles, print PDF |
+| "Is this ready for the printer?" | A handoff check (links, fonts, overset text, image resolution, preflight, page count against the signature, unused styles), then the print PDF and a package folder for the printer |
 
 ## What you need
 
@@ -73,7 +73,7 @@ unpublished work.
 | Manuscript | `profile_tags`, `manuscript_open`, `manuscript_shapes`, `manuscript_outline`, `manuscript_find`, `manuscript_scenes`, `manuscript_rules`, `manuscript_review`, `manuscript_score`, `manuscript_art` |
 | Build | `book_build` (optional trim, margins, target page count) |
 | Art | `art_check`, `art_place` |
-| Finish | `book_signature`, `book_unused_styles`, `book_epub_prep`, `book_epub`, `book_epub_direct`, `book_epub_openers`, `book_pdf` |
+| Finish | `book_signature`, `book_unused_styles`, `book_epub_prep`, `book_epub`, `book_epub_direct`, `book_epub_openers`, `book_pdf`, `book_package` |
 | Design | `design_fonts`, `design_new_document`, `design_impose` |
 | InDesign | `indesign_status`, `indesign_inspect_document`, `indesign_list_styles`, `indesign_export`, `indesign_run_script` |
 | Your scripts | `designer_scripts`, `designer_script_run` (see [designer-scripts/README.md](designer-scripts/README.md)) |
