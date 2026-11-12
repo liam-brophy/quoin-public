@@ -7,7 +7,10 @@ import { z } from 'zod'
 import { APP, InDesignError, runJsx, script } from './bridge.mjs'
 import { toTypestory } from './typestory.mjs'
 import { writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
+import { readFile } from 'node:fs/promises'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { buildBook } from './build.mjs'
 import { buildEpub } from 'book-core/book'
 import { computeState, editRules, loadJob, openJob, predictions, saveJob, styledRuns, summarize, taggedParagraphs } from 'book-core/job'
@@ -20,7 +23,16 @@ import { artCheck, artPlace, attachArtLog } from './art.mjs'
 import { fonts, impose, newDocument, pageSpec, SIZES } from './design.mjs'
 import { epub, epubOpeners, epubPrep, handoffCheck, packageBook, printPdf, signature, unusedStyles } from './export.mjs'
 
-const server = new McpServer({ name: 'indesign', version: '0.1.0' })
+// The workflow guide. Claude Code loads it as a skill; Claude Desktop (one-click extension) has no skills,
+// so the essentials go out as server instructions and the whole guide is one tool call away (quoin_guide).
+const GUIDE = join(dirname(fileURLToPath(import.meta.url)), '..', 'skills', 'indesign', 'SKILL.md')
+const INSTRUCTIONS = `Quoin: tools for Adobe InDesign and book production (manuscripts, templates, art, zines, EPUB, handoff).
+Before a multi-step task (tagging a manuscript, building a book, placing art, a zine, an EPUB, a handoff), call quoin_guide once and follow it.
+Rules: never save, close or overwrite the user's documents; work on copies. Anything that changes a document is previewed first and
+runs only after the user approves (approved: true). Fonts, spacing and layout are the designer's decisions: propose, never impose.
+Report overset text, missing fonts and missing links whenever you see them. Use real quotes and dashes.`
+const VERSION = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'package.json'), 'utf8')).version
+const server = new McpServer({ name: 'indesign', version: VERSION }, { instructions: INSTRUCTIONS })
 
 const docArg = z.string().optional().describe('Name of an open document (e.g. "Book.indd"). Defaults to the active document.')
 const absPath = z.string().refine(isAbsolute, 'Use an absolute path.')
@@ -39,6 +51,27 @@ function tool(fn) {
     }
   }
 }
+
+server.registerTool(
+  'quoin_guide',
+  {
+    title: 'Quoin workflow guide',
+    description: 'How to use these tools well: the workflows for tagging a manuscript, building into a template, art logs, zines, ' +
+      'EPUB and handoff, the rules for editing a designer\'s documents, and ExtendScript gotchas. Call it once before a multi-step task. ' +
+      'Pass section (a heading, e.g. "Zines") for just that part.',
+    inputSchema: { section: z.string().optional() },
+    annotations: READ,
+  },
+  tool(async ({ section }) => {
+    const text = (await readFile(GUIDE, 'utf8')).replace(/^---[\s\S]*?---\n/, '')
+    const parts = text.split(/\n(?=## )/)
+    const headings = parts.slice(1).map((p) => p.split('\n')[0].replace(/^## /, ''))
+    if (!section) return { guide: text, sections: headings }
+    const hit = parts.find((p) => p.startsWith('## ') && p.split('\n')[0].toLowerCase().includes(section.toLowerCase()))
+    if (!hit) throw new Error(`No section matching "${section}". Sections: ${headings.join('; ')}`)
+    return { section: hit.split('\n')[0].replace(/^## /, ''), text: hit }
+  }),
+)
 
 server.registerTool(
   'indesign_status',

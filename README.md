@@ -37,15 +37,22 @@ The part that needs no InDesign (reading manuscripts, tagging jobs, writing EPUB
 
 ## Install
 
-In Claude Code:
+**Claude Desktop (one click, no terminal).** Download `quoin-<version>.mcpb` from the
+[latest release](https://github.com/liam-brophy/quoin-public/releases/latest) and double-click it, or drag it into the Claude
+window. Claude Desktop brings its own Node.js, so there is nothing else to install. Optional settings (your own tag profiles,
+your own scripts, which InDesign to use) are in Settings › Extensions › Quoin.
+
+**Claude Code.**
 
 ```
 /plugin marketplace add liam-brophy/quoin-public
 /plugin install quoin
 ```
 
-The first time it starts, Quoin downloads its dependencies (about a minute). The first time it talks to InDesign,
-macOS asks whether Claude Code may control InDesign: allow it (System Settings › Privacy & Security › Automation).
+The first time it starts, the Claude Code plugin downloads its dependencies (about a minute).
+
+Either way, the first time Quoin talks to InDesign, macOS asks whether Claude may control InDesign: allow it
+(System Settings › Privacy & Security › Automation).
 
 ## How it works
 
@@ -90,7 +97,7 @@ npm test           # book-core self-tests (no InDesign needed)
 npm run smoke      # end-to-end check against InDesign
 ```
 
-`server/` is the MCP server and the InDesign bridge (AppleScript `do script`, so macOS only for now),
+`node scripts/build-extension.mjs` builds the Claude Desktop extension into `dist/`. `server/` is the MCP server and the InDesign bridge (AppleScript `do script`, so macOS only for now),
 `skills/indesign/` teaches Claude the workflows, `designer-scripts/README.md` explains how to register your own InDesign scripts so Quoin can run them
 without their dialogs, `packages/core` is book-core.
 

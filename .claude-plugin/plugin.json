@@ -1,6 +1,6 @@
 {
   "name": "quoin",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "From manuscript to finished book with Claude: tag and structure text, flow it into your template in Adobe InDesign, place art, make zines, and export validated accessible EPUBs. An independent tool for Adobe InDesign; not made or endorsed by Adobe.",
   "license": "Apache-2.0",
   "author": {

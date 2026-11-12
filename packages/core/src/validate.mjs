@@ -1,20 +1,29 @@
 // EPUB checks: EPUBCheck (validity) and DAISY Ace (accessibility), summarised. Both run anywhere
 // Java / Node do; nothing here needs InDesign.
 import { execFile } from 'node:child_process'
-import { existsSync } from 'node:fs'
+import { existsSync, realpathSync } from 'node:fs'
 import { mkdtemp, readFile } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { homedir, tmpdir } from 'node:os'
+import { delimiter, join } from 'node:path'
 import { promisify } from 'node:util'
 
 const exec = promisify(execFile)
+
+// Apps opened from the Dock (Claude Desktop among them) get a minimal PATH, so look where installers put tools too.
+const SEARCH = [...(process.env.PATH ?? '').split(delimiter), '/opt/homebrew/bin', '/usr/local/bin', join(homedir(), '.npm-global', 'bin'), join(homedir(), '.volta', 'bin')]
+export function findCommand(name) {
+  for (const dir of SEARCH) if (dir && existsSync(join(dir, name))) return join(dir, name)
+  return null
+}
 
 export async function epubcheck(file) {
   const dir = await mkdtemp(join(tmpdir(), 'epubcheck-'))
   const json = join(dir, 'report.json')
   // Run EPUBCheck's jar with whichever Java works: Homebrew's launcher hard-codes a JDK path that can go missing.
   const jar = [process.env.EPUBCHECK_JAR, '/usr/local/opt/epubcheck/libexec/epubcheck.jar', '/opt/homebrew/opt/epubcheck/libexec/epubcheck.jar'].find((p) => p && existsSync(p))
-  const [cmd, args] = jar ? ['java', ['-jar', jar, file, '--json', json]] : ['epubcheck', [file, '--json', json]]
+  const java = findCommand('java'), launcher = findCommand('epubcheck')
+  if (!(jar && java) && !launcher) return { skipped: 'EPUBCheck is not installed (optional). On a Mac: brew install epubcheck' }
+  const [cmd, args] = jar && java ? [java, ['-jar', jar, file, '--json', json]] : [launcher, [file, '--json', json]]
   let stderr = ''
   try { await exec(cmd, args, { timeout: 10 * 60_000, maxBuffer: 64 << 20 }) } catch (e) { stderr = String(e.stderr ?? e.message) /* also non-zero when it finds errors */ }
   try {
@@ -37,8 +46,15 @@ export async function epubcheck(file) {
 const rank = (s) => ({ FATAL: 0, ERROR: 1, WARNING: 2, USAGE: 3, INFO: 4 })[s] ?? 5
 
 export async function ace(file) {
+  const bin = findCommand('ace')
+  if (!bin) return { skipped: 'DAISY Ace is not installed (optional). Install it with: npm install -g @daisy/ace' }
   const dir = await mkdtemp(join(tmpdir(), 'ace-'))
-  try { await exec('ace', ['--outdir', dir, '--force', file], { timeout: 15 * 60_000, maxBuffer: 64 << 20 }) } catch { /* non-zero on violations */ }
+  // Ace is a Node script ("#!/usr/bin/env node"): run it with this Node, which may not be on PATH.
+  let script = bin
+  try { script = realpathSync(bin) } catch {}
+  const [cmd, args] = /\.(m?js|cjs)$/.test(script) ? [process.execPath, [script]] : [bin, []]
+  let stderr = ''
+  try { await exec(cmd, [...args, '--outdir', dir, '--force', file], { timeout: 15 * 60_000, maxBuffer: 64 << 20 }) } catch (e) { stderr = String(e.stderr ?? e.message) /* also non-zero on violations */ }
   try {
     const r = JSON.parse(await readFile(join(dir, 'report.json'), 'utf8'))
     const by = new Map()
@@ -59,7 +75,7 @@ export async function ace(file) {
     return { outcome: r['earl:result']?.['earl:outcome'], violationsByImpact: counts, violations: violations.slice(0, 25),
       metadata: r['a11y-metadata'] ? { present: r['a11y-metadata'].present, missing: r['a11y-metadata'].missing } : null, report: join(dir, 'report.html') }
   } catch (e) {
-    return { error: `Ace did not produce a report: ${e.message}` }
+    return { error: `Ace did not produce a report: ${e.message}`, detail: stderr.slice(0, 400) }
   }
 }
 

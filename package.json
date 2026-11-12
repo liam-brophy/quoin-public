@@ -1,6 +1,6 @@
 {
   "name": "quoin",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "description": "Quoin: manuscript-to-book tools for Claude and Adobe InDesign, built on book-core (packages/core).",

@@ -103,9 +103,9 @@ function explainOsascript(err) {
     return 'InDesign refused the request as "modal dialog or alert is active". Sometimes a dialog really is open; often none is, and InDesign\'s scripting is stuck after an earlier script (even Quit is refused then). ' +
       'Ask the designer to look for a dialog first; if there is none, InDesign needs a Force Quit (⌥⌘Esc) and relaunch.'
   if (/-1743|Not authorized/i.test(stderr))
-    return 'macOS blocked automation. Allow it in System Settings → Privacy & Security → Automation for the app running Claude Code.'
+    return 'macOS blocked automation. Allow it in System Settings → Privacy & Security → Automation for the app running Claude (Claude, or your terminal for Claude Code).'
   if (/-1728|Can.t get application|-10814/i.test(stderr))
-    return `Could not find "${APP}". Set INDESIGN_APP in .mcp.json to the app's exact name.`
+    return `Could not find "${APP}". Set the InDesign application name to the app's exact name (Claude Desktop: Settings › Extensions › Quoin; Claude Code: INDESIGN_APP in .mcp.json).`
   return `osascript failed: ${stderr.trim() || err.message}`
 }
 
