@@ -1,7 +1,8 @@
 {
   "name": "quoin",
   "owner": {
-    "name": "Liam Brophy"
+    "name": "Liam Allaire",
+    "url": "https://www.liam.site"
   },
   "metadata": {
     "description": "Quoin: manuscript-to-book tools for Claude and Adobe InDesign."

@@ -65,7 +65,7 @@ try {
       'Needs Adobe InDesign 2024 or later on a Mac (Windows is planned). The first time it talks to InDesign, macOS asks whether Claude may control it: allow it.',
       'An independent project; not made or endorsed by Adobe. Adobe and InDesign are trademarks of Adobe Inc.',
     ].join('\n\n'),
-    author: { name: plugin.author.name, url: REPO },
+    author: { name: plugin.author.name, url: plugin.author.url ?? REPO },
     repository: { type: 'git', url: `${REPO}.git` },
     homepage: REPO,
     documentation: `${REPO}#readme`,
