@@ -1,0 +1,16 @@
+{
+  "name": "quoin",
+  "owner": {
+    "name": "Liam Brophy"
+  },
+  "metadata": {
+    "description": "Quoin: manuscript-to-book tools for Claude and Adobe InDesign."
+  },
+  "plugins": [
+    {
+      "name": "quoin",
+      "source": "./",
+      "description": "From manuscript to finished book: tagging, InDesign builds, art, zines, accessible EPUB."
+    }
+  ]
+}

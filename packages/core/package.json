@@ -1,0 +1,49 @@
+{
+  "name": "book-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Manuscript to tagged book: Word reader, tag profiles, rule-based tagging jobs, style-name resolver, ICML writer, scoring. No InDesign, no Claude: runs anywhere Node runs.",
+  "license": "Apache-2.0",
+  "bin": {
+    "book-core": "bin/book-core.mjs"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./a11y": "./src/a11y.mjs",
+    "./art": "./src/art.mjs",
+    "./book": "./src/book.mjs",
+    "./css": "./src/css.mjs",
+    "./docx": "./src/docx.mjs",
+    "./epub": "./src/epub.mjs",
+    "./icml": "./src/icml.mjs",
+    "./idml": "./src/idml.mjs",
+    "./impose": "./src/impose.mjs",
+    "./job": "./src/job.mjs",
+    "./media": "./src/media.mjs",
+    "./outline": "./src/outline.mjs",
+    "./profile": "./src/profile.mjs",
+    "./report": "./src/report.mjs",
+    "./resolve": "./src/resolve.mjs",
+    "./review": "./src/review.mjs",
+    "./score": "./src/score.mjs",
+    "./strip": "./src/strip.mjs",
+    "./validate": "./src/validate.mjs"
+  },
+  "files": [
+    "src",
+    "bin",
+    "profiles",
+    "scripts"
+  ],
+  "scripts": {
+    "test": "node test/core.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "fflate": "^0.8.2",
+    "saxes": "^6.0.0"
+  }
+}

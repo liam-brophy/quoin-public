@@ -1,0 +1,96 @@
+{
+  "name": "Basic",
+  "source": "built in: a small, plain-language tag set for books, zines and booklets",
+  "topics": {
+    "topic-title": { "name": "Title page", "abbr": "ttlpg" },
+    "topic-copyright": { "name": "Copyright page", "abbr": "cpy" },
+    "topic-dedication": { "name": "Dedication", "abbr": "ded" },
+    "topic-contents": { "name": "Contents", "abbr": "toc" },
+    "topic-front": { "name": "Other front matter (foreword, preface, introduction)", "abbr": "fm" },
+    "topic-chapter": { "name": "Chapter, article or section", "abbr": "chap" },
+    "topic-back": { "name": "Back matter (notes, acknowledgments)", "abbr": "rm" },
+    "topic-about": { "name": "About the author", "abbr": "ata" }
+  },
+  "paragraph": {
+    "p": { "label": "Body paragraph", "fmlo": false },
+    "title": { "label": "Title of the work", "fmlo": false },
+    "subtitle": { "label": "Subtitle", "fmlo": false },
+    "author": { "label": "Author name", "fmlo": false },
+    "chapter-number": { "label": "Chapter number line (\"Chapter 3\", \"3\")", "fmlo": false },
+    "chapter-title": { "label": "Chapter, article or section title", "fmlo": false },
+    "heading": { "label": "Heading inside a chapter", "fmlo": false },
+    "subheading": { "label": "Lower-level heading", "fmlo": false },
+    "quote": { "label": "Block quote or extract", "fmlo": true },
+    "poem": { "label": "Line of verse", "fmlo": true },
+    "list": { "label": "Bulleted or unmarked list item", "fmlo": true },
+    "numbered-list": { "label": "Numbered list item", "fmlo": true },
+    "epigraph": { "label": "Epigraph", "fmlo": true },
+    "attribution": { "label": "Attribution of a quote, epigraph or poem", "fmlo": false },
+    "dedication": { "label": "Dedication text", "fmlo": true },
+    "copyright": { "label": "Copyright page line", "fmlo": true },
+    "caption": { "label": "Image caption", "fmlo": false },
+    "note": { "label": "Note or aside set apart from the text", "fmlo": true },
+    "break": { "label": "Scene or section break", "fmlo": false }
+  },
+  "character": {
+    "i": { "label": "Italic" }, "b": { "label": "Bold" }, "bi": { "label": "Bold italic" },
+    "sc": { "label": "Small caps" }, "sup": { "label": "Superscript" }, "sub": { "label": "Subscript" },
+    "uline": { "label": "Underline" }, "strike": { "label": "Strikethrough" }
+  },
+  "wordStyles": {
+    "title": { "tag": "title", "topic": "topic-title" },
+    "subtitle": { "tag": "subtitle" },
+    "heading 1": { "tag": "chapter-title", "topic": "topic-chapter" },
+    "heading 2": { "tag": "heading" },
+    "heading 3": { "tag": "subheading" },
+    "heading 4": { "tag": "subheading" },
+    "quote": { "tag": "quote" },
+    "intense quote": { "tag": "quote" },
+    "list paragraph": { "tag": "list" },
+    "list bullet": { "tag": "list" },
+    "list number": { "tag": "numbered-list" },
+    "caption": { "tag": "caption" }
+  },
+  "breakTag": "break",
+  "breakPattern": "^((\\* ?){3}|#|\\*{3}|~|⁂)$",
+  "taggingGuide": [
+    "Each chapter, article or section starts a topic-chapter at its title (or number) line.",
+    "A title page, copyright page and dedication each get their own topic when the manuscript has them.",
+    "Use quote for text set apart from the author's own (extracts, letters, messages); poem for verse, one line per paragraph.",
+    "A centred '* * *', '#' or similar line is a break.",
+    "When unsure between two tags, pick the plainer one and mark it low confidence."
+  ],
+  "contextual": {
+    "p": [
+      { "firstInTopic": true, "use": "p-first" },
+      { "after": "heading", "use": "p-first" },
+      { "after": "subheading", "use": "p-first" },
+      { "after": "break", "use": "p-first" }
+    ]
+  },
+  "placeholders": [{ "style": "break", "match": ".*", "replace": "" }],
+  "pagination": { "default": "any", "ttlpg": "recto", "cpy": "verso", "ded": "recto" },
+  "autoCharacter": [
+    { "style": "lang-he", "script": "Hebrew" }, { "style": "lang-el", "script": "Greek" },
+    { "style": "lang-ja", "script": "Hiragana|Katakana" }, { "style": "lang-ar", "script": "Arabic" },
+    { "style": "lang-ru", "script": "Cyrillic" }, { "style": "lang-hi", "script": "Devanagari" }
+  ],
+  "footnotes": { "first": "footnote", "rest": "footnote", "reference": "footnote-ref", "number": "footnote-number", "separator": "\t" },
+  "epub": {
+    "opener": ["chapter-number", "chapter-title", "title", "subtitle", "author"],
+    "ornamentTags": ["break"],
+    "headings": { "title": "h1", "chapter-number": "h1", "chapter-title": "h1", "heading": "h2", "subheading": "h3" },
+    "blockquote": ["quote", "epigraph", "poem", "note"],
+    "lists": { "list": "ul", "numbered-list": "ol" },
+    "breaks": ["break"],
+    "split": ["chapter-title", "chapter-number", "title"],
+    "splitTopics": ["chap", "ttlpg", "cpy", "ded", "fm", "rm", "ata"],
+    "langCodes": { "lang-he": "he", "lang-el": "el", "lang-ja": "ja", "lang-ar": "ar", "lang-ru": "ru", "lang-hi": "hi" },
+    "language": "en",
+    "exclude": ["toc"]
+  },
+  "icmlNames": { "pattern": "{section}{n}_{isbn}_{title}", "bodyStartTopics": ["chap"] },
+  "signature": 4,
+  "fallbackTopic": "chap",
+  "master": null
+}

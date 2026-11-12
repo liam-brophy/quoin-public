@@ -1,0 +1,21 @@
+{
+  "name": "quoin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Quoin: manuscript-to-book tools for Claude and Adobe InDesign, built on book-core (packages/core).",
+  "license": "Apache-2.0",
+  "scripts": {
+    "smoke": "node scripts/smoke.mjs",
+    "test": "npm test -w book-core"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "fflate": "^0.8.2",
+    "zod": "4.1.12",
+    "book-core": "0.1.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}
